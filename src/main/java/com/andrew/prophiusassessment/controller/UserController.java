@@ -1,7 +1,9 @@
 package com.andrew.prophiusassessment.controller;
 
 import com.andrew.prophiusassessment.dto.UserLoginDto;
+import com.andrew.prophiusassessment.dto.UserLoginResponseDto;
 import com.andrew.prophiusassessment.dto.UserRegistrationDto;
+import com.andrew.prophiusassessment.entity.User;
 import com.andrew.prophiusassessment.exceptions.UserAlreadyExistException;
 import com.andrew.prophiusassessment.exceptions.UserNotFoundException;
 import com.andrew.prophiusassessment.response.ApiResponse;
@@ -17,7 +19,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/v1/user")
+//@RequestMapping("/api/v1/user")
+//@RequestMapping("/api/v1/user")
 public class UserController {
 
     private final UserService userService;
@@ -27,7 +30,7 @@ public class UserController {
         this.userService = userService;
     }
 
-    @PostMapping("/registration")
+    @PostMapping("/register")
     public ResponseEntity<?> registerUserAccount(@Valid @RequestBody UserRegistrationDto registrationDto) {
         try {
             userService.registerNewUserAccount(registrationDto);
@@ -38,11 +41,11 @@ public class UserController {
         // Include more exception handling as necessary
     }
 
-    @PostMapping("/login")
+    @PostMapping("/user")
     public ResponseEntity<?> loginUser(@Validated @RequestBody UserLoginDto loginDto) {
         try {
-            userService.loginUser(loginDto);
-            return ResponseEntity.ok(new ApiResponse("Login successful"));
+            UserLoginResponseDto loginResponse = userService.loginUser(loginDto);
+            return ResponseEntity.ok(new ApiResponse("Login Successful", loginResponse));
         } catch (UserNotFoundException e) {
             return new ResponseEntity<>(new ApiResponse(e.getMessage()), HttpStatus.UNAUTHORIZED);
         }
