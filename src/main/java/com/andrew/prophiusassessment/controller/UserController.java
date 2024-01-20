@@ -44,12 +44,6 @@ public class UserController {
         return userService.getUserDetails(authentication.getName())
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
-//        try {
-//            User userDetails = userService.getUserDetails(authentication.getName());
-//            return ResponseEntity.ok().body(userDetails);
-//        } catch (UserNotFoundException e) {
-//            return new ResponseEntity<>(new ApiResponse<>(e.getMessage()), HttpStatus.NOT_FOUND);
-//        }
 
     }
 

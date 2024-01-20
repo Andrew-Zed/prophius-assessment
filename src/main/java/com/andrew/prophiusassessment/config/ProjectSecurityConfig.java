@@ -6,8 +6,10 @@ import com.andrew.prophiusassessment.filter.JWTTokenValidatorFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -40,8 +42,10 @@ public class ProjectSecurityConfig {
                         config.setMaxAge(3600L);
                         return config;
                     }
-                })).csrf((csrf) -> csrf.csrfTokenRequestHandler(requestHandler).ignoringRequestMatchers("/contact","/register","/posts")
-                        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
+                })).csrf(AbstractHttpConfigurer::disable)
+
+//                        csrf.csrfTokenRequestHandler(requestHandler).ignoringRequestMatchers("/contact","/register","/create-post")
+//                        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
                 .addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class)
                 .addFilterAfter(new JWTTokenGeneratorFilter(), BasicAuthenticationFilter.class)
                 .addFilterBefore(new JWTTokenValidatorFilter(), BasicAuthenticationFilter.class)
@@ -50,8 +54,9 @@ public class ProjectSecurityConfig {
                         .requestMatchers("/myComments").hasRole("USER")
                         .requestMatchers("/myLikes").hasRole("USER")
                         .requestMatchers( "/user").authenticated()
-                        .requestMatchers("/posts").authenticated()    //.hasRole("USER")
-                        .requestMatchers("/contact","/register").permitAll())
+                        .requestMatchers("/create-post").authenticated()    //.hasRole("USER")
+//                        .requestMatchers("/posts").authenticated()
+                        .requestMatchers("/contact","/register", "/posts/**").permitAll())
                 .formLogin(Customizer.withDefaults())
                 .httpBasic(Customizer.withDefaults());
 

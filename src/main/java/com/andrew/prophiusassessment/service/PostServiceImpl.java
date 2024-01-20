@@ -4,6 +4,8 @@ import com.andrew.prophiusassessment.dto.PostDTO;
 import com.andrew.prophiusassessment.entity.Post;
 import com.andrew.prophiusassessment.repositories.PostRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -26,12 +28,38 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public PostDTO getPostById(Long id) {
-        return null;
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Post not found with id " + id));
+        return convertEntityToDTO(post);
     }
 
     @Override
-    public List<PostDTO> getAllPosts() {
-        return null;
+    public Page<PostDTO> getAllPosts(Pageable pageable) {
+        return postRepository.findAll(pageable)
+                .map(this::convertEntityToDTO);
+    }
+
+    @Override
+    public long getTotalPosts() {
+        return postRepository.count();
+    }
+
+    @Override
+    public PostDTO updatePost(Long id, PostDTO postDTO) {
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Post not found with id " + id));
+
+        post.setContent(postDTO.getContent());
+
+        Post updatedPost = postRepository.save(post);
+        return convertEntityToDTO(updatedPost);
+    }
+
+    @Override
+    public void deletePost(Long id) {
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Post not found with id " + id));
+        postRepository.delete(post);
     }
 
     private PostDTO convertEntityToDTO(Post post) {
