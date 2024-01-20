@@ -12,9 +12,9 @@ import lombok.Setter;
 public class UserRegistrationDto {
     @NotEmpty(message = "Username is required")
     private String username;
-    @NotBlank
+    @NotBlank(message = "Firstname can not be blank")
     private String firstName;
-    @NotBlank
+    @NotBlank(message = "Lastname can not be blank")
     private String lastName;
 
     @Email(message = "Email should be valid")

@@ -5,6 +5,7 @@ import com.andrew.prophiusassessment.entity.User;
 import com.andrew.prophiusassessment.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -29,15 +30,18 @@ public class ProjectUsernamePwdAuthenticationProvider implements AuthenticationP
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         String username = authentication.getName();
         String pwd = authentication.getCredentials().toString();
-        Optional<User> userList = userRepository.findByEmail(username);
-
-        if (userList.isPresent() && passwordEncoder.matches(pwd, userList.get().getPassword())) {
-            return new UsernamePasswordAuthenticationToken(username, pwd, getGrantedAuthorities(userList.get().getAuthorities()));
+        Optional<User> userL = userRepository.findByEmail(username);
+//        List<User> users = userRepository.findByEmail(username);
+//        if (users.size() > 0) {
+        if (userL.isPresent()) {
+            if(passwordEncoder.matches(pwd, userL.get().getPassword())){
+                return new UsernamePasswordAuthenticationToken(username, pwd, getGrantedAuthorities(userL.get().getAuthorities()));
+            } else {
+                throw new BadCredentialsException("Invalid password!");
+            }
+        } else {
+            throw new BadCredentialsException("No user registered with this details!");
         }
-//        if (userList.isPresent()) {
-//            return new UsernamePasswordAuthenticationToken(username, pwd, getGrantedAuthorities(userList.get().getAuthorities()));
-//        }
-        return null;
     }
 
     private List<GrantedAuthority> getGrantedAuthorities(Set<Authority> authorities) {

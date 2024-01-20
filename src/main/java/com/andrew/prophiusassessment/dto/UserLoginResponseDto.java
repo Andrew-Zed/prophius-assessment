@@ -7,13 +7,11 @@ import lombok.Data;
 
 @Builder
 public class UserLoginResponseDto {
-    private Long userId;
     private String username;
     private String email;
     private String token;
 
-    public UserLoginResponseDto(Long userId, String username, String email, String token) {
-        this.userId = userId;
+    public UserLoginResponseDto(String username, String email, String token) {
         this.username = username;
         this.email = email;
         this.token = token;

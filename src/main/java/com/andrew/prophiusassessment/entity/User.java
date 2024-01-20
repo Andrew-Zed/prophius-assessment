@@ -9,12 +9,14 @@ import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 @Entity
-//@Data
+//@Getter
+//@Setter
 @Table(name = "users")
-@NoArgsConstructor
+//@NoArgsConstructor
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,10 +25,10 @@ public class User {
     @Column(name = "username", nullable = false)
     private String username;
 
+    private String profilePicture;
+
     @Column(name = "first_name")
-//    @NotBlank
     private String firstName;
-//    @NotBlank
     @Column(name = "last_name")
     private String lastName;
 
@@ -43,6 +45,12 @@ public class User {
     @JsonIgnore
     @OneToMany(mappedBy="user",fetch=FetchType.EAGER)
     private Set<Authority> authorities;
+    @ManyToMany
+    private Set<User> followers;
+    @ManyToMany(mappedBy = "followers")
+    private Set<User> following;
+    @OneToMany(mappedBy = "user")
+    private List<Post> posts;
 
     public Long getId() {
         return id;
@@ -58,6 +66,14 @@ public class User {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public String getProfilePicture() {
+        return profilePicture;
+    }
+
+    public void setProfilePicture(String profilePicture) {
+        this.profilePicture = profilePicture;
     }
 
     public String getFirstName() {
@@ -106,5 +122,29 @@ public class User {
 
     public void setAuthorities(Set<Authority> authorities) {
         this.authorities = authorities;
+    }
+
+    public Set<User> getFollowers() {
+        return followers;
+    }
+
+    public void setFollowers(Set<User> followers) {
+        this.followers = followers;
+    }
+
+    public Set<User> getFollowing() {
+        return following;
+    }
+
+    public void setFollowing(Set<User> following) {
+        this.following = following;
+    }
+
+    public List<Post> getPosts() {
+        return posts;
+    }
+
+    public void setPosts(List<Post> posts) {
+        this.posts = posts;
     }
 }

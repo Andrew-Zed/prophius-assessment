@@ -1,7 +1,5 @@
 package com.andrew.prophiusassessment.controller;
 
-import com.andrew.prophiusassessment.dto.UserLoginDto;
-import com.andrew.prophiusassessment.dto.UserLoginResponseDto;
 import com.andrew.prophiusassessment.dto.UserRegistrationDto;
 import com.andrew.prophiusassessment.entity.User;
 import com.andrew.prophiusassessment.exceptions.UserAlreadyExistException;
@@ -12,14 +10,15 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Optional;
+
 @RestController
-//@RequestMapping("/api/v1/user")
 //@RequestMapping("/api/v1/user")
 public class UserController {
 
@@ -34,21 +33,24 @@ public class UserController {
     public ResponseEntity<?> registerUserAccount(@Valid @RequestBody UserRegistrationDto registrationDto) {
         try {
             userService.registerNewUserAccount(registrationDto);
-            return new ResponseEntity<>(new ApiResponse("User registered successfully"), HttpStatus.CREATED);
+            return new ResponseEntity<>(new ApiResponse<>("User registered successfully"), HttpStatus.CREATED);
         } catch (UserAlreadyExistException e) {
-            return new ResponseEntity<>(new ApiResponse(e.getMessage()), HttpStatus.CONFLICT);
+            return new ResponseEntity<>(new ApiResponse<>(e.getMessage()), HttpStatus.CONFLICT);
         }
-        // Include more exception handling as necessary
     }
 
-    @PostMapping("/user")
-    public ResponseEntity<?> loginUser(@Validated @RequestBody UserLoginDto loginDto) {
-        try {
-            UserLoginResponseDto loginResponse = userService.loginUser(loginDto);
-            return ResponseEntity.ok(new ApiResponse("Login Successful", loginResponse));
-        } catch (UserNotFoundException e) {
-            return new ResponseEntity<>(new ApiResponse(e.getMessage()), HttpStatus.UNAUTHORIZED);
-        }
+    @RequestMapping("/user")
+    public ResponseEntity<?> getUserDetailsAfterLogin(Authentication authentication) {
+        return userService.getUserDetails(authentication.getName())
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
+//        try {
+//            User userDetails = userService.getUserDetails(authentication.getName());
+//            return ResponseEntity.ok().body(userDetails);
+//        } catch (UserNotFoundException e) {
+//            return new ResponseEntity<>(new ApiResponse<>(e.getMessage()), HttpStatus.NOT_FOUND);
+//        }
+
     }
 
 }
