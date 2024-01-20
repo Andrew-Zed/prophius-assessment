@@ -32,7 +32,7 @@ public class ProjectSecurityConfig {
                     @Override
                     public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
                         CorsConfiguration config = new CorsConfiguration();
-                        config.setAllowedOrigins(Collections.singletonList("http://localhost:4200"));
+                        config.setAllowedOrigins(Collections.singletonList("*"));
                         config.setAllowedMethods(Collections.singletonList("*"));
                         config.setAllowCredentials(true);
                         config.setAllowedHeaders(Collections.singletonList("*"));
@@ -40,7 +40,7 @@ public class ProjectSecurityConfig {
                         config.setMaxAge(3600L);
                         return config;
                     }
-                })).csrf((csrf) -> csrf.csrfTokenRequestHandler(requestHandler).ignoringRequestMatchers("/contact","/register")
+                })).csrf((csrf) -> csrf.csrfTokenRequestHandler(requestHandler).ignoringRequestMatchers("/contact","/register","/posts")
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
                 .addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class)
                 .addFilterAfter(new JWTTokenGeneratorFilter(), BasicAuthenticationFilter.class)
@@ -50,6 +50,7 @@ public class ProjectSecurityConfig {
                         .requestMatchers("/myComments").hasRole("USER")
                         .requestMatchers("/myLikes").hasRole("USER")
                         .requestMatchers( "/user").authenticated()
+                        .requestMatchers("/posts").authenticated()    //.hasRole("USER")
                         .requestMatchers("/contact","/register").permitAll())
                 .formLogin(Customizer.withDefaults())
                 .httpBasic(Customizer.withDefaults());
