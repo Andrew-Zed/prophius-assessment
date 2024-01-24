@@ -11,4 +11,7 @@ public interface UserService{
 //    UserLoginResponseDto loginUser(UserLoginDto loginDto);
     Optional<User> getUserDetails(String email);
 
+    void followUser(Long userId, Long followUserId);
+    void unfollowUser(Long userId, Long followUserId);
+
 }

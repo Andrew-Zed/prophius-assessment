@@ -9,6 +9,7 @@ import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -46,9 +47,12 @@ public class User {
     @OneToMany(mappedBy="user",fetch=FetchType.EAGER)
     private Set<Authority> authorities;
     @ManyToMany
-    private Set<User> followers;
+    @JoinTable(name = "user_followers",
+    joinColumns = @JoinColumn(name = "user_id"),
+    inverseJoinColumns = @JoinColumn(name = "follower_id"))
+    private Set<User> followers = new HashSet<>();
     @ManyToMany(mappedBy = "followers")
-    private Set<User> following;
+    private Set<User> following = new HashSet<>();
     @OneToMany(mappedBy = "user")
     private List<Post> posts;
 
@@ -146,5 +150,14 @@ public class User {
 
     public void setPosts(List<Post> posts) {
         this.posts = posts;
+    }
+
+    public void follow(User user) {
+        following.add(user);
+        user.followers.add(this);
+    }
+    public void unfollow(User user) {
+        following.remove(user);
+        user.followers.remove(this);
     }
 }

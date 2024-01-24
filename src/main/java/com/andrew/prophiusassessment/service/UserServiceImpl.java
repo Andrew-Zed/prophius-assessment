@@ -5,6 +5,7 @@ import com.andrew.prophiusassessment.entity.User;
 import com.andrew.prophiusassessment.exceptions.UserAlreadyExistException;
 import com.andrew.prophiusassessment.exceptions.UserNotFoundException;
 import com.andrew.prophiusassessment.repositories.UserRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -36,6 +37,28 @@ public class UserServiceImpl implements UserService {
         user.setRole("USER");
         user.setEmail(registrationDto.getEmail().toLowerCase());
         user.setPassword(hashPwd);
+        userRepository.save(user);
+    }
+
+    @Override
+    @Transactional
+    public void followUser(Long userId, Long followUserId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        User userToFollow = userRepository.findById(followUserId)
+                .orElseThrow(() -> new RuntimeException("User to follow not found"));
+        user.follow(userToFollow);
+        userRepository.save(user);
+    }
+
+    @Override
+    @Transactional
+    public void unfollowUser(Long userId, Long followUserId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        User userToUnfollow = userRepository.findById(followUserId)
+                .orElseThrow(() -> new RuntimeException(""));
+        user.unfollow(userToUnfollow);
         userRepository.save(user);
     }
 
