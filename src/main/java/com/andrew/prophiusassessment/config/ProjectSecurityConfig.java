@@ -29,6 +29,7 @@ public class ProjectSecurityConfig {
     SecurityFilterChain defaultSecurityFilterChain(HttpSecurity httpSecurity) throws Exception {
         CsrfTokenRequestAttributeHandler requestHandler = new CsrfTokenRequestAttributeHandler();
         requestHandler.setCsrfRequestAttributeName("_csrf");
+
         httpSecurity.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .cors(corsCustomizer -> corsCustomizer.configurationSource(new CorsConfigurationSource() {
                     @Override
@@ -42,21 +43,18 @@ public class ProjectSecurityConfig {
                         config.setMaxAge(3600L);
                         return config;
                     }
-                })).csrf(AbstractHttpConfigurer::disable)
-
-//                        csrf.csrfTokenRequestHandler(requestHandler).ignoringRequestMatchers("/contact","/register","/create-post")
-//                        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
+                })).csrf((csrf) -> csrf.csrfTokenRequestHandler(requestHandler).ignoringRequestMatchers("/contact","/register","/posts/**")
+                        .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
                 .addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class)
                 .addFilterAfter(new JWTTokenGeneratorFilter(), BasicAuthenticationFilter.class)
                 .addFilterBefore(new JWTTokenValidatorFilter(), BasicAuthenticationFilter.class)
                 .authorizeHttpRequests((requests)->requests
                         .requestMatchers("/myProfile").hasAnyRole("USER","ADMIN")
-                        .requestMatchers("/myComments").hasRole("USER")
                         .requestMatchers("/myLikes").hasRole("USER")
                         .requestMatchers( "/user").authenticated()
-                        .requestMatchers("/create-post").authenticated()    //.hasRole("USER")
+//                        .requestMatchers("/posts/create-post").authenticated()   //.hasRole("USER")
 //                        .requestMatchers("/posts").authenticated()
-                        .requestMatchers("/contact","/register", "/posts/**").permitAll())
+                        .requestMatchers("/contact","/register","/posts/**").permitAll())
                 .formLogin(Customizer.withDefaults())
                 .httpBasic(Customizer.withDefaults());
 

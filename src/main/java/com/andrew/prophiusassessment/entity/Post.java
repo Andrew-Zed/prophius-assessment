@@ -1,15 +1,13 @@
 package com.andrew.prophiusassessment.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
-@Getter
-@Setter
 public class Post {
 
     @Id
@@ -22,6 +20,14 @@ public class Post {
     private User user;
     @OneToMany
     private List<Comment> comments;
+
+    @ManyToMany
+    @JoinTable(
+            name = "post_likes",
+            joinColumns = @JoinColumn(name = "post_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    private Set<User> likedByUsers = new HashSet<>();
 
     public Long getId() {
         return id;
@@ -47,9 +53,6 @@ public class Post {
         this.createdDate = createdDate;
     }
 
-    public int getLikesCount() {
-        return likesCount;
-    }
 
     public void setLikesCount(int likesCount) {
         this.likesCount = likesCount;
@@ -70,4 +73,25 @@ public class Post {
     public void setComments(List<Comment> comments) {
         this.comments = comments;
     }
+
+    public Set<User> getLikedByUsers() {
+        return likedByUsers;
+    }
+
+    public void setLikedByUsers(Set<User> likedByUsers) {
+        this.likedByUsers = likedByUsers;
+    }
+
+    public void addLike(User user) {
+        likedByUsers.add(user);
+    }
+
+    public void removeLike(User user) {
+        likedByUsers.remove(user);
+    }
+
+    public int getLikesCount() {
+        return likedByUsers.size();
+    }
+
 }

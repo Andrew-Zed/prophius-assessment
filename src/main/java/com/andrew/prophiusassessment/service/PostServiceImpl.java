@@ -2,18 +2,27 @@ package com.andrew.prophiusassessment.service;
 
 import com.andrew.prophiusassessment.dto.PostDTO;
 import com.andrew.prophiusassessment.entity.Post;
+import com.andrew.prophiusassessment.entity.User;
+import com.andrew.prophiusassessment.exceptions.PostNotFoundException;
 import com.andrew.prophiusassessment.repositories.PostRepository;
+import com.andrew.prophiusassessment.repositories.UserRepository;
+import com.andrew.prophiusassessment.response.ApiResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
 @Service
+@Transactional
 public class PostServiceImpl implements PostService {
     @Autowired
     private PostRepository postRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Override
     public PostDTO createPost(PostDTO postDTO) {
@@ -58,8 +67,32 @@ public class PostServiceImpl implements PostService {
     @Override
     public void deletePost(Long id) {
         Post post = postRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Post not found with id " + id));
+                .orElseThrow(() -> new PostNotFoundException("Post not found with id " + id));
         postRepository.delete(post);
+    }
+
+    @Transactional
+    @Override
+    public void likePost(Long postId, Long userId) {
+      Post post = postRepository.findById(postId)
+              .orElseThrow(() -> new RuntimeException("Post not found"));
+      User user = userRepository.findById(userId)
+              .orElseThrow(() -> new RuntimeException("User not found"));
+
+      post.addLike(user);
+      postRepository.save(post);
+    }
+
+    @Transactional
+    @Override
+    public void unlikePost(Long postId, Long userId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new RuntimeException("Post not found"));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        post.removeLike(user);
+        postRepository.save(post);
     }
 
     private PostDTO convertEntityToDTO(Post post) {

@@ -6,7 +6,9 @@ import com.andrew.prophiusassessment.entity.Comment;
 import com.andrew.prophiusassessment.entity.Post;
 import com.andrew.prophiusassessment.entity.User;
 import com.andrew.prophiusassessment.repositories.PostRepository;
+import com.andrew.prophiusassessment.repositories.UserRepository;
 import com.andrew.prophiusassessment.service.PostServiceImpl;
+import com.andrew.prophiusassessment.service.UserServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -30,6 +32,12 @@ public class PostServiceImplTest {
 
     @InjectMocks
     private PostServiceImpl postService;
+
+    @Mock
+    private UserRepository userRepository;
+
+    @InjectMocks
+    UserServiceImpl userService;
 
     @BeforeEach
     void setUp() {
@@ -57,9 +65,14 @@ public class PostServiceImplTest {
         Post post = new Post();
         post.setContent("Test Content");
         post.setCreatedDate(now);
-        post.setLikesCount(10);
         post.setUser(user);
         post.setComments(comments);
+
+        for (long i = 1; i <= 10; i++) {
+          User liker = new User();
+          liker.setId(i);
+          post.addLike(liker);
+        }
 
         assertEquals("Test Content", post.getContent());
         assertEquals(now, post.getCreatedDate());
@@ -145,13 +158,44 @@ public class PostServiceImplTest {
     }
 
     @Test
+    void likePostSuccess() {
+        Long postId = 1L;
+        Long userId = 2L;
+
+        Post mockPost = new Post();
+        mockPost.setId(postId);
+
+        User mockUser = new User();
+        mockUser.setId(userId);
+
+        when(postRepository.findById(postId)).thenReturn(Optional.of(mockPost));
+        when(userRepository.findById(userId)).thenReturn(Optional.of(mockUser));
+
+        postService.likePost(postId, userId);
+
+        assertTrue(mockPost.getLikedByUsers().contains(mockUser));
+        verify(postRepository, times(1)).findById(postId);
+        verify(userRepository, times(1)).findById(userId);
+        verify(postRepository, times(1)).save(mockPost);
+
+    }
+
+    @Test
     void updateLikesCount() {
         Post post = new Post();
-        post.setLikesCount(5);
-        assertEquals(5, post.getLikesCount());
+        User user1 = new User();
+        user1.setId(1L);
+        User user2 = new User();
+        user2.setId(2L);
 
-        post.setLikesCount(10);
-        assertEquals(10, post.getLikesCount());
+        post.addLike(user1);
+        assertEquals(1, post.getLikesCount());
+
+        post.addLike(user2);
+        assertEquals(2, post.getLikesCount());
+
+        post.removeLike(user1);
+        assertEquals(1, post.getLikesCount());
     }
 
 }
